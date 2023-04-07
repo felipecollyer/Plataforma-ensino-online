@@ -2,14 +2,21 @@ const mongoose = require("mongoose");
 
 const { Schema } = mongoose;
 
-const Materias = mongoose.model(
+const Materia = mongoose.model(
     "Materias",
     new Schema({
-            Materia: String,
-            Titulo:String,
-            Detalhes:String,
-            Desafios:String
+            AreaDeAtuacao: String,
+            Conteudos:{
+                type:Object,
+                Materia:[
+                    {
+                        Titulo:String,
+                        Detalhes:String,
+                        Desafios:String
+                    }
+                ]
+            }
         })
 );
 
-module.exports = Materias;
+module.exports = Materia;

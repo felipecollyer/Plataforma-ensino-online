@@ -30,9 +30,9 @@ module.exports = class ControlandoAdm {
         const TodosUsuarios = await Usuario.find()
         const UsuariosPorMateriaFront= await Usuario.find({MateriaEscolhida: 'FrontEnd'})
         const UsuariosPorMateriaBack = await Usuario.find({MateriaEscolhida: 'BackEnd'})
-        
+        const MostrarMaterias = await Materias.find()
 
-        res.json({TodosUsuarios,UsuariosAguardando,UsuariosPorMateriaFront,UsuariosPorMateriaBack})
+        res.json({TodosUsuarios,UsuariosAguardando,UsuariosPorMateriaFront,UsuariosPorMateriaBack,MostrarMaterias})
     }
 
     static async editandoUsuarios(req,res) {
@@ -48,17 +48,14 @@ module.exports = class ControlandoAdm {
     }
 
     static async criandoMaterias(req,res) {
-        const { Materia, Titulo, Detalhes, Desafios} = req.body
+        const { AreaDeAtuacao, Conteudos} = req.body
         
-        console.log(req.body)
-        const materia = {
-            Materia,
-            Titulo,
-            Detalhes,
-            Desafios
+        const criandoMateria = {
+            AreaDeAtuacao,
+            Conteudos,
         }
         
-        await Materias.create(materia)
-        res.json({materia})
+        await Materias.create(criandoMateria)
+        res.json({criandoMateria})
     }
 }
