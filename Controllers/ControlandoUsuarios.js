@@ -101,20 +101,11 @@ module.exports = class ControlandoUsuarios {
                 }else {
 
                     const PegarMateriaDoUsuario = await verificarEmail.MateriaEscolhida
-
-                    const PegarMateriaDados = await Materias.findOne({Materia: PegarMateriaDoUsuario})
-
-                    const Materia = PegarMateriaDados.Materia
-                    const Titulo = PegarMateriaDados.Titulo
-                    const Detalhes = PegarMateriaDados.Detalhes
-                    const Desafios = PegarMateriaDados.Desafios
-
-                    const PlanoDeEstudos = {
-                        Materia,
-                        Titulo,
-                        Detalhes,
-                        Desafios,
-                    }
+                    
+                    const PegarMateriaDados = await Materias.findOne({AreaDeAtuacao: PegarMateriaDoUsuario})
+                    
+                    
+                    const PlanoDeEstudos = PegarMateriaDados.Conteudos
 
                     return res.json({PlanoDeEstudos})
                 }
