@@ -1,5 +1,5 @@
 import  express  from "express";
-//import RotasUsuario from "./routes/RotasUsuario";
+import RotasUsuario from "./routes/RotasUsuario";
 import RotasAdm from "./routes/RotasAdm";
 
 
@@ -12,7 +12,7 @@ const app = express();
 //configure json Express
 app.use(express.json());
 
-//app.use("/", RotasUsuario);
+app.use("/", RotasUsuario);
 
 app.use("/", RotasAdm);
 

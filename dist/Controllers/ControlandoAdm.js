@@ -9,11 +9,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ControlandoAdm = void 0;
 const Usuario_1 = require("../Models/Usuario");
 const Materias_1 = require("../Models/Materias");
 class ControlandoAdm {
-    static logandoAdmin(req, res) {
+    logandoAdmin(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             const { Email, Senha } = req.body;
             //Checando dados recebidos
@@ -32,7 +31,7 @@ class ControlandoAdm {
             }
         });
     }
-    static mostrandoUsuarios(req, res) {
+    mostrandoUsuarios(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             const UsuariosAguardando = yield Usuario_1.Usuario.find({ Acesso: 'Aguardando' });
             const UsuariosAtivado = yield Usuario_1.Usuario.find({ Acesso: 'Ativado' });
@@ -40,10 +39,10 @@ class ControlandoAdm {
             const UsuariosPorMateriaFront = yield Usuario_1.Usuario.find({ MateriaEscolhida: 'FrontEnd' });
             const UsuariosPorMateriaBack = yield Usuario_1.Usuario.find({ MateriaEscolhida: 'BackEnd' });
             const MostrarMaterias = yield Materias_1.materias.find();
-            res.json({ TodosUsuarios, UsuariosAguardando, UsuariosPorMateriaFront, UsuariosPorMateriaBack, MostrarMaterias });
+            return res.json({ TodosUsuarios, UsuariosAtivado, UsuariosAguardando, UsuariosPorMateriaFront, UsuariosPorMateriaBack, MostrarMaterias });
         });
     }
-    static editandoUsuarios(req, res) {
+    editandoUsuarios(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             const id = req.params.id;
             Materias_1.materias.findOne({ _id: id });
@@ -55,7 +54,7 @@ class ControlandoAdm {
             }
         });
     }
-    static criandoMaterias(req, res) {
+    criandoMaterias(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             const { AreaDeAtuacao, Conteudos } = req.body;
             const criandoMateria = {
@@ -65,4 +64,4 @@ class ControlandoAdm {
         });
     }
 }
-exports.ControlandoAdm = ControlandoAdm;
+exports.default = new ControlandoAdm();

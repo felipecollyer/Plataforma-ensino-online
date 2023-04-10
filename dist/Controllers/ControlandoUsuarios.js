@@ -9,11 +9,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ControlandoUsuarios = void 0;
 const Usuario_1 = require("../Models/Usuario");
 const Materias_1 = require("../Models/Materias");
 class ControlandoUsuarios {
-    static criandoCadastro(req, res) {
+    criandoCadastro(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             const { SeuNome, Email, Celular, Senha, ConfirmaSenha, PrimeiroContato, MateriaEscolhida, } = req.body;
             //respostas do usuario
@@ -86,7 +85,7 @@ class ControlandoUsuarios {
             });
         });
     }
-    static criandoLogin(req, res) {
+    criandoLogin(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             const { Email, Senha } = req.body;
             const verificarEmail = yield Usuario_1.Usuario.findOne({ Email: Email });
@@ -106,7 +105,8 @@ class ControlandoUsuarios {
                     return res.json({ msg: 'Senha incorreta!' });
                 }
             }
+            //}
         });
     }
 }
-exports.ControlandoUsuarios = ControlandoUsuarios;
+exports.default = new ControlandoUsuarios();

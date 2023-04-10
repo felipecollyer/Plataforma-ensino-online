@@ -1,4 +1,4 @@
-/*import { Request, Response } from "express";
+import { Request, Response } from "express";
 import { Usuario } from "../Models/Usuario";
 import { materias } from "../Models/Materias";
 
@@ -129,4 +129,3 @@ class ControlandoUsuarios {
 
 export default new ControlandoUsuarios()
 
-*/

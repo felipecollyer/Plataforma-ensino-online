@@ -12,4 +12,4 @@ const usuariosSchema = new mongoose_1.Schema({
     MateriaEscolhida: String,
     Acesso: String,
 });
-exports.Usuario = (0, mongoose_1.model)('Usuario', usuariosSchema);
+exports.Usuario = (0, mongoose_1.model)('xUsuario', usuariosSchema);

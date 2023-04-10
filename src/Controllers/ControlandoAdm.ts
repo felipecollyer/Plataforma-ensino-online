@@ -25,14 +25,14 @@ class ControlandoAdm {
 
     public async mostrandoUsuarios(req:Request, res:Response){
         
-        // const UsuariosAguardando = await Usuario.find({Acesso:'Aguardando'})
-        // const UsuariosAtivado = await Usuario.find({Acesso:'Ativado'})
-        // const TodosUsuarios = await Usuario.find()
-        // const UsuariosPorMateriaFront= await Usuario.find({MateriaEscolhida: 'FrontEnd'})
-        // const UsuariosPorMateriaBack = await Usuario.find({MateriaEscolhida: 'BackEnd'})
-        // const MostrarMaterias = await materias.find()
+        const UsuariosAguardando = await Usuario.find({Acesso:'Aguardando'})
+        const UsuariosAtivado = await Usuario.find({Acesso:'Ativado'})
+        const TodosUsuarios = await Usuario.find()
+        const UsuariosPorMateriaFront= await Usuario.find({MateriaEscolhida: 'FrontEnd'})
+        const UsuariosPorMateriaBack = await Usuario.find({MateriaEscolhida: 'BackEnd'})
+        const MostrarMaterias = await materias.find()
 
-       return res.json({msg:'oi'})
+        return res.json({TodosUsuarios,UsuariosAtivado,UsuariosAguardando,UsuariosPorMateriaFront,UsuariosPorMateriaBack,MostrarMaterias})
     }
 
     public async editandoUsuarios(req:Request, res:Response){
