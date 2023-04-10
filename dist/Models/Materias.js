@@ -15,4 +15,4 @@ const materiaSchema = new mongoose_1.Schema({
         ]
     }
 });
-exports.materias = (0, mongoose_1.model)('materias', materiaSchema);
+exports.materias = (0, mongoose_1.model)("materias", materiaSchema);
