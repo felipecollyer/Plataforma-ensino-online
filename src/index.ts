@@ -5,7 +5,7 @@ import RotasAdm from "./routes/RotasAdm";
 
 require("dotenv").config();
 
-const conn = require("../db/conn");
+const conn = require("./db/conn");
 const app = express();
 
 
