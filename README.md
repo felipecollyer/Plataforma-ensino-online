@@ -27,7 +27,7 @@ http://localhost:3000/admin/create/materias _- Usando o metodo POST enviado o js
 
 - _neste exemplo criaria um material de frontEnd_
 
-```
+```json
 {
   {
     "AreaDeAtuacao":**"Front-end"**,
