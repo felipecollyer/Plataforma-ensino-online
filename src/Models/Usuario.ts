@@ -24,5 +24,5 @@ const usuariosSchema =  new Schema({
         Acesso: String,
 })
 
-export const Usuario = model<Iusuarios>('xUsuario', usuariosSchema)
+export const Usuario = model<Iusuarios>('Usuario', usuariosSchema)
 

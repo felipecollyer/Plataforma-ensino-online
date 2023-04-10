@@ -26,13 +26,11 @@ class ControlandoAdm {
     public async mostrandoUsuarios(req:Request, res:Response){
         
         const UsuariosAguardando = await Usuario.find({Acesso:'Aguardando'})
-        const UsuariosAtivado = await Usuario.find({Acesso:'Ativado'})
+        const UsuariosAtivados = await Usuario.find({Acesso:'Ativo'})
         const TodosUsuarios = await Usuario.find()
-        const UsuariosPorMateriaFront= await Usuario.find({MateriaEscolhida: 'FrontEnd'})
-        const UsuariosPorMateriaBack = await Usuario.find({MateriaEscolhida: 'BackEnd'})
         const MostrarMaterias = await materias.find()
 
-        return res.json({TodosUsuarios,UsuariosAtivado,UsuariosAguardando,UsuariosPorMateriaFront,UsuariosPorMateriaBack,MostrarMaterias})
+        return res.json({TodosUsuarios,UsuariosAtivados,UsuariosAguardando,MostrarMaterias})
     }
 
     public async editandoUsuarios(req:Request, res:Response){
@@ -69,7 +67,11 @@ class ControlandoAdm {
             AreaDeAtuacao,
             Conteudos,
         }
-    
+        
+        materias.create(criandoMateria)
+
+        return res.status(201).json({msg:'Conteudo criado com sucesso!'})
+
     }
 
 } 

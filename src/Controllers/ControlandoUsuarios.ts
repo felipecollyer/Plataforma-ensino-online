@@ -103,6 +103,10 @@ class ControlandoUsuarios {
         const {Email, Senha} = req.body
 
         const verificarEmail = await Usuario.findOne({Email: Email})
+
+        if(!verificarEmail) {
+            return res.json({msg:'E-mail incorreto!'})
+        }
         
         if(verificarEmail) {
             //checar a senha com email

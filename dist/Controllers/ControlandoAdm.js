@@ -34,12 +34,10 @@ class ControlandoAdm {
     mostrandoUsuarios(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             const UsuariosAguardando = yield Usuario_1.Usuario.find({ Acesso: 'Aguardando' });
-            const UsuariosAtivado = yield Usuario_1.Usuario.find({ Acesso: 'Ativado' });
+            const UsuariosAtivados = yield Usuario_1.Usuario.find({ Acesso: 'Ativo' });
             const TodosUsuarios = yield Usuario_1.Usuario.find();
-            const UsuariosPorMateriaFront = yield Usuario_1.Usuario.find({ MateriaEscolhida: 'FrontEnd' });
-            const UsuariosPorMateriaBack = yield Usuario_1.Usuario.find({ MateriaEscolhida: 'BackEnd' });
             const MostrarMaterias = yield Materias_1.materias.find();
-            return res.json({ TodosUsuarios, UsuariosAtivado, UsuariosAguardando, UsuariosPorMateriaFront, UsuariosPorMateriaBack, MostrarMaterias });
+            return res.json({ TodosUsuarios, UsuariosAtivados, UsuariosAguardando, MostrarMaterias });
         });
     }
     editandoUsuarios(req, res) {
@@ -61,6 +59,8 @@ class ControlandoAdm {
                 AreaDeAtuacao,
                 Conteudos,
             };
+            Materias_1.materias.create(criandoMateria);
+            return res.status(201).json({ msg: 'Conteudo criado com sucesso!' });
         });
     }
 }
