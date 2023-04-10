@@ -1,8 +1,24 @@
+
 import {Schema, model} from "mongoose";
 
-export const materia = model(
-    "Materias",
-    new Schema({
+
+
+interface Imateria extends Document {
+    AreaDeAtuacao: string,
+            Conteudos:{
+                type:object,
+                Materia:[
+                    {
+                        Titulo:string,
+                        Detalhes:string,
+                        Desafios:string
+                    }
+                ]
+            }
+}
+
+
+const materiaSchema = new Schema({
             AreaDeAtuacao: String,
             Conteudos:{
                 type:Object,
@@ -15,5 +31,6 @@ export const materia = model(
                 ]
             }
         })
-);
+
+export const materias = model<Imateria>('materias',materiaSchema)
 
