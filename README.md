@@ -30,9 +30,9 @@ http://localhost:3000/admin/create/materias _- Usando o metodo POST enviado o js
 ```json
 {
   {
-    "AreaDeAtuacao":**"Front-end"**,
+    "AreaDeAtuacao": **"Front-end"**,
     "Conteudos": {
-      "Materia":[{
+      "Materia": [{
         `Etapa 1`: Fundamentos do desenvolvimento web,
          `Detalhes`
             1. HTML(HyperText Markup Language)
@@ -43,8 +43,8 @@ http://localhost:3000/admin/create/materias _- Usando o metodo POST enviado o js
       }, {
     "Titulo":
       `Etapa 2`: Aprofundamento em CSS e design responsivo,
-      "Detalhes":"Flexbox / CSS Grid / Media Queries / Bootstrap ou outro framework CSS (opcional)",
-      "Desafios":"Desafio: Adapte a página web criada anteriormente para ser responsiva em diferentes dispositivos e resoluções."
+      "Detalhes": "Flexbox / CSS Grid / Media Queries / Bootstrap ou outro framework CSS (opcional)",
+      "Desafios": "Desafio: Adapte a página web criada anteriormente para ser responsiva em diferentes dispositivos e resoluções."
     }]
   }
 }
@@ -56,13 +56,13 @@ http://localhost:3000/cadastrar _-Usando o metodo POST enviado o json dessa mane
 
 ```Json
 {
-    "SeuNome":**"teste"**,
-    "Email":**"teste@hotmail.com"**,
-    "Celular":**21997645425**,
-    "Senha":**"teste"**,
-    "ConfirmaSenha":**"teste"**,
-    "PrimeiroContato":**"sim"**,
-    "MateriaEscolhida":**"Front-end"**
+    "SeuNome": **"teste"**,
+    "Email": **"teste@hotmail.com"**,
+    "Celular": **21997645425**,
+    "Senha": **"teste"**,
+    "ConfirmaSenha": **"teste"**,
+    "PrimeiroContato": **"sim"**,
+    "MateriaEscolhida": **"Front-end"**
 }
 ```
 
