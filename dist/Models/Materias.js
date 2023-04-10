@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.materia = void 0;
+exports.materias = void 0;
 const mongoose_1 = require("mongoose");
-exports.materia = (0, mongoose_1.model)("Materias", new mongoose_1.Schema({
+const materiaSchema = new mongoose_1.Schema({
     AreaDeAtuacao: String,
     Conteudos: {
         type: Object,
@@ -14,4 +14,5 @@ exports.materia = (0, mongoose_1.model)("Materias", new mongoose_1.Schema({
             }
         ]
     }
-}));
+});
+exports.materias = (0, mongoose_1.model)('materias', materiaSchema);

@@ -1,15 +1,18 @@
+import  express  from "express";
+//import RotasUsuario from "./routes/RotasUsuario";
+import RotasAdm from "./routes/RotasAdm";
+
+
 require("dotenv").config();
-const express = require("express");
-const conn = require("./db/conn");
+
+const conn = require("../db/conn");
 const app = express();
-const RotasUsuario = require("./routes/RotasUsuario");
-const RotasAdm = require("./routes/RotasAdm");
 
 
 //configure json Express
 app.use(express.json());
 
-app.use("/", RotasUsuario);
+//app.use("/", RotasUsuario);
 
 app.use("/", RotasAdm);
 
@@ -22,6 +25,6 @@ conn()
     .then(() => {
         app.listen(3000);
     })
-    .catch((err) => {
-        console.log(err);
+    .catch(() => {
+        console.log('error ao conectar o banco de dados');
     });

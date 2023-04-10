@@ -1,14 +1,10 @@
-const Usuario = require("../models/Usuario");
-const Materias = require('../models/Materias')
-const VerificarRespostas = require("../helpers/autenticacao");
-const {VerificarUsuarioEmail} = require("../helpers/VerificarUsuario");
-const {VerificarUsuarioCelular} = require("../helpers/VerificarUsuario");
+/*import { Request, Response } from "express";
+import { Usuario } from "../Models/Usuario";
+import { materias } from "../Models/Materias";
 
+class ControlandoUsuarios {
 
-
-
-module.exports = class ControlandoUsuarios {
-    static async criandoCadastro(req, res) {
+    public async criandoCadastro(req:Request, res:Response) {
         const {
             SeuNome,
             Email,
@@ -54,25 +50,39 @@ module.exports = class ControlandoUsuarios {
         }
 
       //veririfcar campos vazio
-        if (VerificarRespostas(RespostaUsuario)) {
-            return res.status(200).json({
-                msg: "Algum campo esta vazio",
-            });
-        }
+        if (
+        !RespostaUsuario.SeuNome ||
+        !RespostaUsuario.Email ||
+        !RespostaUsuario.Celular ||
+        !RespostaUsuario.Senha ||
+        !RespostaUsuario.PrimeiroContato ||
+        !RespostaUsuario.MateriaEscolhida
+    ){
+        return res.status(200).json({
+            msg: "Algum campo esta vazio",
+        });
+    }
+        
 
         //verificar se Email ja foi cadastrado
-        if (await VerificarUsuarioEmail(RespostaUsuario.Email)) {
+        const verificarEmail = await Usuario.findOne({ Email: RespostaUsuario.Email });
+    
+        if (verificarEmail) {
+                return res.status(200).json({
+                    msg: "Email ja cadastrado!",
+                });
+        } 
+        
+
+        //verificar se Celular ja foi cadastrado
+        const verificarCelular = await Usuario.findOne({ Celular: RespostaUsuario.Celular});
+
+        if (verificarCelular) {
             return res.status(200).json({
-                msg: "Email ja cadastrado!",
+                msg: "Celular ja cadastrado!",
             });
         }
 
-        //verificar se Celular ja foi cadastrado
-        if(await VerificarUsuarioCelular(RespostaUsuario.Celular)){
-            return res.status(200).json({
-                msg:'Celular, ja cadastrado'
-            })
-        }
 
         //conferir senha e confirmSenha
         if(Senha !== ConfirmaSenha) {
@@ -88,7 +98,8 @@ module.exports = class ControlandoUsuarios {
         });
     }
 
-    static async criandoLogin(req,res) {
+
+    public async criandoLogin(req:Request, res:Response) {
         const {Email, Senha} = req.body
 
         const verificarEmail = await Usuario.findOne({Email: Email})
@@ -102,18 +113,20 @@ module.exports = class ControlandoUsuarios {
 
                     const PegarMateriaDoUsuario = await verificarEmail.MateriaEscolhida
                     
-                    const PegarMateriaDados = await Materias.findOne({AreaDeAtuacao: PegarMateriaDoUsuario})
-                    
-                    
-                    const PlanoDeEstudos = PegarMateriaDados.Conteudos
+                    const PegarMateriaDados = await materias.findOne({AreaDeAtuacao: PegarMateriaDoUsuario})
 
-                    return res.json({PlanoDeEstudos})
+                    return res.json({PegarMateriaDados})
                 }
             }else {
                 return res.json({msg:'Senha incorreta!'})
             }
         }
+    //}
+
     }
 
-};
+}
 
+export default new ControlandoUsuarios()
+
+*/
