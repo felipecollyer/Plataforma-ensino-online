@@ -89,6 +89,9 @@ class ControlandoUsuarios {
         return __awaiter(this, void 0, void 0, function* () {
             const { Email, Senha } = req.body;
             const verificarEmail = yield Usuario_1.Usuario.findOne({ Email: Email });
+            if (!verificarEmail) {
+                return res.json({ msg: 'E-mail incorreto!' });
+            }
             if (verificarEmail) {
                 //checar a senha com email
                 if (Senha == verificarEmail.Senha) {
