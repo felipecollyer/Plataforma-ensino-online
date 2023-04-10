@@ -7,7 +7,7 @@ const express_1 = __importDefault(require("express"));
 const RotasUsuario_1 = __importDefault(require("./routes/RotasUsuario"));
 const RotasAdm_1 = __importDefault(require("./routes/RotasAdm"));
 require("dotenv").config();
-const conn = require("./db/conn");
+const conn_1 = __importDefault(require("./db/conn"));
 const app = (0, express_1.default)();
 //configure json Express
 app.use(express_1.default.json());
@@ -17,7 +17,7 @@ app.get("/", (req, res) => {
     return res.status(200).json({ msg: "bem vindo SouDev" });
 });
 //conectando ao banco
-conn()
+(0, conn_1.default)()
     .then(() => {
     app.listen(3000);
 })

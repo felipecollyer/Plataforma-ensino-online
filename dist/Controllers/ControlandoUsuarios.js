@@ -24,15 +24,15 @@ class ControlandoUsuarios {
                 ConfirmaSenha,
                 PrimeiroContato,
                 MateriaEscolhida,
-                Acesso: 'Aguardando'
+                Acesso: "Aguardando"
             };
             //criando administrador
-            if (RespostaUsuario.SeuNome == 'administrador' && RespostaUsuario.Email == 'administrador' && RespostaUsuario.Senha == 'administrador') {
+            if (RespostaUsuario.SeuNome == "administrador" && RespostaUsuario.Email == "administrador" && RespostaUsuario.Senha == "administrador") {
                 const criarAdministrador = {
                     SeuNome,
                     Email,
                     Senha,
-                    Acesso: 'administrador'
+                    Acesso: "administrador"
                 };
                 const verificarEmail = yield Usuario_1.Usuario.findOne({ email: RespostaUsuario.Email });
                 if (verificarEmail) {
@@ -90,13 +90,13 @@ class ControlandoUsuarios {
             const { Email, Senha } = req.body;
             const verificarEmail = yield Usuario_1.Usuario.findOne({ Email: Email });
             if (!verificarEmail) {
-                return res.json({ msg: 'E-mail incorreto!' });
+                return res.json({ msg: "E-mail incorreto!" });
             }
             if (verificarEmail) {
                 //checar a senha com email
                 if (Senha == verificarEmail.Senha) {
-                    if (verificarEmail.Acesso !== 'Ativo') {
-                        return res.json({ msg: 'Aguarde aprovacao do seu cadastro!' });
+                    if (verificarEmail.Acesso !== "Ativo") {
+                        return res.json({ msg: "Aguarde aprovacao do seu cadastro!" });
                     }
                     else {
                         const PegarMateriaDoUsuario = yield verificarEmail.MateriaEscolhida;
@@ -105,7 +105,7 @@ class ControlandoUsuarios {
                     }
                 }
                 else {
-                    return res.json({ msg: 'Senha incorreta!' });
+                    return res.json({ msg: "Senha incorreta!" });
                 }
             }
             //}
