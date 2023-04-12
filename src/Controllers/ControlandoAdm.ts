@@ -1,6 +1,8 @@
 import { Request, Response } from "express"
-import { Usuario } from "../Models/Usuario"
+
 import { materias } from "../Models/Materias"
+import { Usuario } from "../Models/Usuario"
+import { NaoAutorizado, NotFoundError } from "../halpers/apiError"
 
 class ControlandoAdm {
 
@@ -10,16 +12,14 @@ class ControlandoAdm {
     //Checando dados recebidos
     const EmailRecebido = await Usuario.findOne({ Email: Email })
 
-    if (EmailRecebido) {
-      //verificar Senha
-      if (Senha == EmailRecebido.Senha) {
-        res.status(200).json({ msg: "bem vindo ao admin" })
-      } else {
-        res.status(200).json({ msg: "Acesso negado" })
-      }
-    } else {
-      res.status(200).json({ msg: "Acesso negado" })
-    }
+    //verificar Senha
+    if (!EmailRecebido)
+      throw new NotFoundError("Acesso negado")
+
+    if (!(Senha == EmailRecebido.Senha))
+      throw new NaoAutorizado("Acesso negado")
+
+    return res.status(200).json({ messag: "Bem vindo" })
   }
 
   public async mostrandoUsuarios(req: Request, res: Response) {
