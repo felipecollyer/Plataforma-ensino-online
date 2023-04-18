@@ -1,6 +1,7 @@
 import { Request, Response } from "express"
 import { Usuario } from "../Models/Usuario"
 import { materias } from "../Models/Materias"
+import { NaoAutorizado } from "../halpers/apiError"
 
 class ControlandoUsuarios {
 
@@ -38,9 +39,7 @@ class ControlandoUsuarios {
       const verificarEmail = await Usuario.findOne({ email: RespostaUsuario.Email })
 
       if (verificarEmail) {
-        return res.status(200).json({
-          msg: "Criacao de admin invalida",
-        })
+        throw new NaoAutorizado("Criação de admin invalid")
       } else {
         await Usuario.create(criarAdministrador)
         return res.status(200).json({
@@ -57,36 +56,20 @@ class ControlandoUsuarios {
       !RespostaUsuario.Senha ||
       !RespostaUsuario.PrimeiroContato ||
       !RespostaUsuario.MateriaEscolhida
-    ) {
-      return res.status(200).json({
-        msg: "Algum campo esta vazio",
-      })
-    }
+    )
+      throw new NaoAutorizado("Verifique os dados e tente novamente")
 
     //verificar se Email ja foi cadastrado
-    const verificarEmail = await Usuario.findOne({ Email: RespostaUsuario.Email })
-
-    if (verificarEmail) {
-      return res.status(200).json({
-        msg: "Email ja cadastrado!",
-      })
-    }
+    if (await Usuario.findOne({ Email: RespostaUsuario.Email }))
+      throw new NaoAutorizado("Senha incorreta!")
 
     //verificar se Celular ja foi cadastrado
-    const verificarCelular = await Usuario.findOne({ Celular: RespostaUsuario.Celular })
-
-    if (verificarCelular) {
-      return res.status(200).json({
-        msg: "Celular ja cadastrado!",
-      })
-    }
+    if (await Usuario.findOne({ Celular: RespostaUsuario.Celular }))
+      throw new NaoAutorizado("Celular já cadrastado!")
 
     //conferir senha e confirmSenha
-    if (Senha !== ConfirmaSenha) {
-      return res.status(200).json({
-        msg: "Senha e ConfirmSenha nao sao iguais",
-      })
-    }
+    if (Senha !== ConfirmaSenha)
+      throw new NaoAutorizado("Senhas incompativeis!")
 
     //criando Usuario no banco de dados.
     await Usuario.create(RespostaUsuario)
@@ -95,37 +78,29 @@ class ControlandoUsuarios {
     })
   }
 
-
   public async criandoLogin(req: Request, res: Response) {
     const { Email, Senha } = req.body
 
     const verificarEmail = await Usuario.findOne({ Email: Email })
 
-    if (!verificarEmail) {
-      return res.json({ msg: "E-mail incorreto!" })
-    }
+    if (!verificarEmail)
+      throw new NaoAutorizado("Email ou Senha incorreta!")
 
-    if (verificarEmail) {
-      //checar a senha com email
-      if (Senha == verificarEmail.Senha) {
-        if (verificarEmail.Acesso !== "Ativo") {
-          return res.json({ msg: "Aguarde aprovacao do seu cadastro!" })
-        } else {
-
-          const PegarMateriaDoUsuario = await verificarEmail.MateriaEscolhida
-
-          const PegarMateriaDados = await materias.findOne({ AreaDeAtuacao: PegarMateriaDoUsuario })
-
-          return res.json({ PegarMateriaDados })
-        }
+    if (Senha == verificarEmail.Senha) {
+      if (verificarEmail.Acesso !== "Ativo") {
+        return res.json({ msg: "Aguarde aprovacao do seu cadastro!" })
       } else {
-        return res.json({ msg: "Senha incorreta!" })
+
+        const PegarMateriaDoUsuario = await verificarEmail.MateriaEscolhida
+
+        const PegarMateriaDados = await materias.findOne({ AreaDeAtuacao: PegarMateriaDoUsuario })
+
+        return res.json({ PegarMateriaDados })
       }
+    } else {
+      throw new NaoAutorizado("Senha incorreta!")
     }
-    //}
-
   }
-
 }
 
 export default new ControlandoUsuarios()
