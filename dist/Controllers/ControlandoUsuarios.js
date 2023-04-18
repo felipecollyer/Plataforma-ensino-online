@@ -8,107 +8,147 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const Usuario_1 = require("../Models/Usuario");
-const Materias_1 = require("../Models/Materias");
+const bcrypt_1 = __importDefault(require("bcrypt"));
+const criando_token_1 = __importDefault(require("../helpers/criando-token"));
 class ControlandoUsuarios {
     criandoCadastro(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             const { SeuNome, Email, Celular, Senha, ConfirmaSenha, PrimeiroContato, MateriaEscolhida, } = req.body;
             //respostas do usuario
-            const RespostaUsuario = {
-                SeuNome,
-                Email,
-                Celular,
-                Senha,
-                ConfirmaSenha,
-                PrimeiroContato,
-                MateriaEscolhida,
-                Acesso: "Aguardando"
-            };
             //criando administrador
-            if (RespostaUsuario.SeuNome == "administrador" && RespostaUsuario.Email == "administrador" && RespostaUsuario.Senha == "administrador") {
-                const criarAdministrador = {
-                    SeuNome,
-                    Email,
-                    Senha,
-                    Acesso: "administrador"
-                };
-                const verificarEmail = yield Usuario_1.Usuario.findOne({ email: RespostaUsuario.Email });
-                if (verificarEmail) {
-                    return res.status(200).json({
-                        msg: "Criacao de admin invalida",
-                    });
+            if (SeuNome == "administrador" && Email == "administrador" && Senha == "administrador") {
+                const VerificarAdm = Usuario_1.Usuario.findOne({ Email: Email });
+                if (!VerificarAdm) {
+                    const salt = bcrypt_1.default.genSaltSync(10);
+                    const criptografar = bcrypt_1.default.hashSync(Senha, salt);
+                    const criarAdministrador = {
+                        SeuNome,
+                        Email,
+                        Senha: criptografar,
+                        Acesso: "administrador"
+                    };
+                    try {
+                        yield Usuario_1.Usuario.create(criarAdministrador);
+                        return res.status(201).json({ msg: 'Administrador criado com sucesso!' });
+                    }
+                    catch (error) {
+                        res.status(500).json({ msg: error });
+                    }
                 }
                 else {
-                    yield Usuario_1.Usuario.create(criarAdministrador);
-                    return res.status(200).json({
-                        msg: "Administrador criado com sucesso!",
-                    });
+                    return res.status(401).json({ msg: 'Nao e possivel criar administrador.' });
                 }
             }
             //veririfcar campos vazio
-            if (!RespostaUsuario.SeuNome ||
-                !RespostaUsuario.Email ||
-                !RespostaUsuario.Celular ||
-                !RespostaUsuario.Senha ||
-                !RespostaUsuario.PrimeiroContato ||
-                !RespostaUsuario.MateriaEscolhida) {
-                return res.status(200).json({
-                    msg: "Algum campo esta vazio",
+            if (!SeuNome ||
+                !Email ||
+                !Celular ||
+                !Senha ||
+                !PrimeiroContato ||
+                !MateriaEscolhida) {
+                return res.status(400).json({
+                    msg: "Verifique os campos, e preencha os vazios.",
                 });
             }
             //verificar se Email ja foi cadastrado
-            const verificarEmail = yield Usuario_1.Usuario.findOne({ Email: RespostaUsuario.Email });
-            if (verificarEmail) {
-                return res.status(200).json({
-                    msg: "Email ja cadastrado!",
+            try {
+                const verificarEmail = yield Usuario_1.Usuario.findOne({ Email: Email });
+                if (verificarEmail) {
+                    return res.status(422).json({
+                        msg: "Email ja cadastrado!",
+                    });
+                }
+            }
+            catch (error) {
+                return res.status(500).json({
+                    msg: error,
                 });
             }
             //verificar se Celular ja foi cadastrado
-            const verificarCelular = yield Usuario_1.Usuario.findOne({ Celular: RespostaUsuario.Celular });
-            if (verificarCelular) {
-                return res.status(200).json({
-                    msg: "Celular ja cadastrado!",
+            try {
+                const verificarCelular = yield Usuario_1.Usuario.findOne({ Celular: Celular });
+                if (verificarCelular) {
+                    return res.status(422).json({
+                        msg: "Celular ja cadastrado!",
+                    });
+                }
+            }
+            catch (error) {
+                return res.status(500).json({
+                    msg: error,
                 });
             }
             //conferir senha e confirmSenha
             if (Senha !== ConfirmaSenha) {
-                return res.status(200).json({
+                return res.status(422).json({
                     msg: "Senha e ConfirmSenha nao sao iguais",
                 });
             }
             //criando Usuario no banco de dados.
-            yield Usuario_1.Usuario.create(RespostaUsuario);
-            return res.status(200).json({
-                msg: "Usuario criado com sucesso! Aguarde a aprovacao do seu cadastro.",
-            });
+            try {
+                const salt = bcrypt_1.default.genSaltSync(10);
+                const criptografar = bcrypt_1.default.hashSync(Senha, salt);
+                const CriandoUsuario = {
+                    SeuNome,
+                    Email,
+                    Celular,
+                    Senha: criptografar,
+                    PrimeiroContato,
+                    MateriaEscolhida,
+                    Acesso: "Aguardando"
+                };
+                yield Usuario_1.Usuario.create(CriandoUsuario);
+                return res.status(201).json({ msg: 'Usuario criado com sucesso' });
+            }
+            catch (error) {
+                return res.status(500).json({ msg: error });
+            }
         });
     }
     criandoLogin(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             const { Email, Senha } = req.body;
-            const verificarEmail = yield Usuario_1.Usuario.findOne({ Email: Email });
-            if (!verificarEmail) {
-                return res.json({ msg: "E-mail incorreto!" });
-            }
-            if (verificarEmail) {
-                //checar a senha com email
-                if (Senha == verificarEmail.Senha) {
-                    if (verificarEmail.Acesso !== "Ativo") {
-                        return res.json({ msg: "Aguarde aprovacao do seu cadastro!" });
-                    }
-                    else {
-                        const PegarMateriaDoUsuario = yield verificarEmail.MateriaEscolhida;
-                        const PegarMateriaDados = yield Materias_1.materias.findOne({ AreaDeAtuacao: PegarMateriaDoUsuario });
-                        return res.json({ PegarMateriaDados });
-                    }
+            try {
+                const usuarioExistente = yield Usuario_1.Usuario.findOne({ Email: Email });
+                if (!usuarioExistente) {
+                    return res.status(400).json({ msg: "E-mail nao cadastrado!" });
                 }
                 else {
-                    return res.json({ msg: "Senha incorreta!" });
+                    if (usuarioExistente.Email === 'administrador') {
+                        const checarSenha = bcrypt_1.default.compareSync(Senha, usuarioExistente.Senha);
+                        if (checarSenha) {
+                            return (0, criando_token_1.default)(usuarioExistente, req, res);
+                        }
+                        else {
+                            return res.status(400).json({ msg: "Senha incorreta!" });
+                        }
+                    }
+                    else {
+                        const checarSenha = bcrypt_1.default.compareSync(Senha, usuarioExistente.Senha);
+                        if (checarSenha) {
+                            return (0, criando_token_1.default)(usuarioExistente, req, res);
+                        }
+                        else {
+                            return res.status(400).json({ msg: "Senha incorreta!" });
+                        }
+                    }
                 }
             }
-            //}
+            catch (error) {
+                return res.status(500).json({ msg: error });
+            }
+        });
+    }
+    deleteUsuario(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const user = 'teste';
+            yield Usuario_1.Usuario.deleteOne({ Email: user });
+            res.json({ msg: 'deletado com sucesso!!' });
         });
     }
 }

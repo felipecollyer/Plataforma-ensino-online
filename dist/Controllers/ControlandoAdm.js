@@ -8,47 +8,62 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const Usuario_1 = require("../Models/Usuario");
 const Materias_1 = require("../Models/Materias");
+const pegando_token_1 = __importDefault(require("../helpers/pegando-token"));
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 class ControlandoAdm {
-    logandoAdmin(req, res) {
+    mostrandoUsuarios(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { Email, Senha } = req.body;
-            //Checando dados recebidos
-            const EmailRecebido = yield Usuario_1.Usuario.findOne({ Email: Email });
-            if (EmailRecebido) {
-                //verificar Senha
-                if (Senha == EmailRecebido.Senha) {
-                    res.status(200).json({ msg: "bem vindo ao admin" });
-                }
-                else {
-                    res.status(200).json({ msg: "Acesso negado" });
+            let adminAcessando;
+            if (req.headers.authorization) {
+                const token = (0, pegando_token_1.default)(req);
+                if (token) {
+                    const acessandoToken = jsonwebtoken_1.default.verify(token, 'meuSecret');
+                    if (acessandoToken.acesso === 'administrador') {
+                        try {
+                            const adminAcessando = {
+                                UsuariosAguardando: yield Usuario_1.Usuario.find({ Acesso: "Aguardando" }).select('-_id'),
+                                UsuariosAtivados: yield Usuario_1.Usuario.find({ Acesso: "Ativo" }).select('-_id'),
+                                TodosUsuarios: yield Usuario_1.Usuario.find().select('-_id'),
+                                MostrarMaterias: yield Materias_1.materias.find()
+                            };
+                            return res.status(201).json({ adminAcessando });
+                        }
+                        catch (error) {
+                            return res.status(500).json({ msg: error });
+                        }
+                    }
+                    else {
+                        return res.status(403).json({ msg: 'Area restrita para adm' });
+                    }
                 }
             }
             else {
-                res.status(200).json({ msg: "Acesso negado" });
+                adminAcessando = null;
+                res.send(adminAcessando);
             }
-        });
-    }
-    mostrandoUsuarios(req, res) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const UsuariosAguardando = yield Usuario_1.Usuario.find({ Acesso: "Aguardando" });
-            const UsuariosAtivados = yield Usuario_1.Usuario.find({ Acesso: "Ativo" });
-            const TodosUsuarios = yield Usuario_1.Usuario.find();
-            const MostrarMaterias = yield Materias_1.materias.find();
-            return res.json({ TodosUsuarios, UsuariosAtivados, UsuariosAguardando, MostrarMaterias });
         });
     }
     editandoUsuarios(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
-            const id = req.params.id;
-            Materias_1.materias.findOne({ _id: id });
-            const UsuariosAguardando = yield Usuario_1.Usuario.findOne({ _id: id });
-            if (UsuariosAguardando) {
-                UsuariosAguardando.Acesso = "Ativo";
-                yield UsuariosAguardando.save();
-                res.json({ msg: "Usuario com acesso ATIVO." });
+            const idRecebido = req.params.id;
+            try {
+                if (idRecebido) {
+                    const UsuariosAguardando = yield Usuario_1.Usuario.findOne({ _id: idRecebido });
+                    if (UsuariosAguardando) {
+                        UsuariosAguardando.Acesso = "Ativo";
+                        yield UsuariosAguardando.save();
+                        return res.status(201).json({ msg: "Usuario alterado para acesso ATIVO." });
+                    }
+                }
+            }
+            catch (error) {
+                return res.status(500).json({ msg: 'id invalido ou incorreto' });
             }
         });
     }
@@ -59,8 +74,34 @@ class ControlandoAdm {
                 AreaDeAtuacao,
                 Conteudos,
             };
-            Materias_1.materias.create(criandoMateria);
-            return res.status(201).json({ msg: "Conteudo criado com sucesso!" });
+            const ArrayRecebidoDeConteudos = criandoMateria.Conteudos.Materia;
+            const VerificarCamposDeMaterias = ArrayRecebidoDeConteudos.map((materia, index) => {
+                if (!materia.Titulo || !materia.Detalhes || !materia.Desafios) {
+                    return index + 1;
+                }
+                else {
+                    return false;
+                }
+            });
+            if (criandoMateria.AreaDeAtuacao) {
+                const verificarCamposFalse = VerificarCamposDeMaterias.filter(materia => {
+                    if (materia) {
+                        return materia;
+                    }
+                });
+                if (verificarCamposFalse.length != 0) {
+                    return res.status(400).json({ msg: `Preencha os campos da materia ${verificarCamposFalse} corretamente.` });
+                }
+                else {
+                    try {
+                        Materias_1.materias.create(criandoMateria);
+                        return res.status(201).json({ msg: 'Materia criada com sucesso' });
+                    }
+                    catch (error) {
+                        return res.status(500).json({ msg: error });
+                    }
+                }
+            }
         });
     }
 }

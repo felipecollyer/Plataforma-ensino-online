@@ -1,46 +1,61 @@
 import { Request, Response } from "express"
 import { Usuario } from "../Models/Usuario"
 import { materias } from "../Models/Materias"
+import PegarToken  from '../helpers/pegando-token'
+import { JwtPayload } from "jsonwebtoken"
+import  jwt from 'jsonwebtoken'
+
 
 class ControlandoAdm {
 
-  public async logandoAdmin(req: Request, res: Response) {
-    const { Email, Senha } = req.body
+  public async mostrandoUsuarios(req: Request, res: Response) {
 
-    //Checando dados recebidos
-    const EmailRecebido = await Usuario.findOne({ Email: Email })
+    let adminAcessando
 
-    if (EmailRecebido) {
-      //verificar Senha
-      if (Senha == EmailRecebido.Senha) {
-        res.status(200).json({ msg: "bem vindo ao admin" })
-      } else {
-        res.status(200).json({ msg: "Acesso negado" })
+    if(req.headers.authorization) {
+
+      const token = PegarToken(req)
+
+      if(token) {
+        const acessandoToken = jwt.verify(token, 'meuSecret') as JwtPayload
+
+          if(acessandoToken.acesso === 'administrador') {
+            try {
+              const adminAcessando = {
+                 UsuariosAguardando : await Usuario.find({ Acesso: "Aguardando" }).select('-_id'),
+                 UsuariosAtivados : await Usuario.find({ Acesso: "Ativo" }).select('-_id'),
+                 TodosUsuarios : await Usuario.find().select('-_id'),
+                 MostrarMaterias : await materias.find()
+              }
+              return res.status(201).json({ adminAcessando })
+            } catch (error) {
+              return res.status(500).json({ msg: error })
+            }
+
+          }else{
+            return res.status(403).json({ msg: 'Area restrita para adm' })
+           }
       }
-    } else {
-      res.status(200).json({ msg: "Acesso negado" })
+    }else {
+        adminAcessando = null
+        res.send(adminAcessando)
     }
   }
 
-  public async mostrandoUsuarios(req: Request, res: Response) {
-
-    const UsuariosAguardando = await Usuario.find({ Acesso: "Aguardando" })
-    const UsuariosAtivados = await Usuario.find({ Acesso: "Ativo" })
-    const TodosUsuarios = await Usuario.find()
-    const MostrarMaterias = await materias.find()
-
-    return res.json({ TodosUsuarios, UsuariosAtivados, UsuariosAguardando, MostrarMaterias })
-  }
-
   public async editandoUsuarios(req: Request, res: Response) {
-    const id = req.params.id
-    materias.findOne({ _id: id })
-    const UsuariosAguardando = await Usuario.findOne({ _id: id })
+    const idRecebido = req.params.id
+    try { 
+      if(idRecebido) {
+        const UsuariosAguardando = await Usuario.findOne({ _id: idRecebido })
 
-    if (UsuariosAguardando) {
-      UsuariosAguardando.Acesso = "Ativo"
-      await UsuariosAguardando.save()
-      res.json({ msg: "Usuario com acesso ATIVO." })
+        if (UsuariosAguardando) {
+          UsuariosAguardando.Acesso = "Ativo"
+          await UsuariosAguardando.save()
+          return res.status(201).json({ msg: "Usuario alterado para acesso ATIVO." })
+        }
+      }
+    } catch (error) {
+      return res.status(500).json({ msg: 'id invalido ou incorreto' })
     }
   }
 
@@ -66,10 +81,35 @@ class ControlandoAdm {
       AreaDeAtuacao,
       Conteudos,
     }
+    
+    const ArrayRecebidoDeConteudos = criandoMateria.Conteudos.Materia
+    const VerificarCamposDeMaterias = ArrayRecebidoDeConteudos.map((materia, index) => {
+        if(!materia.Titulo || !materia.Detalhes || !materia.Desafios) {
+          return index + 1
+        }else{
+          return false 
+        }
+    } )
 
-    materias.create(criandoMateria)
-
-    return res.status(201).json({ msg: "Conteudo criado com sucesso!" })
+    if(criandoMateria.AreaDeAtuacao) {
+      
+      const verificarCamposFalse = VerificarCamposDeMaterias.filter(materia => {
+          if(materia) {
+            return materia
+          }
+      })
+  
+      if(verificarCamposFalse.length != 0) {
+        return res.status(400).json({msg: `Preencha os campos da materia ${verificarCamposFalse} corretamente.`})
+      }else {
+        try {
+          materias.create(criandoMateria)
+          return res.status(201).json({msg: 'Materia criada com sucesso'})
+        } catch (error) {
+          return res.status(500).json({msg: error})
+        }
+      }
+    }
   }
 }
 

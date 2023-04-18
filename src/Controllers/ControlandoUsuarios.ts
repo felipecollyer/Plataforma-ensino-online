@@ -1,6 +1,8 @@
 import { Request, Response } from "express"
 import { Usuario } from "../Models/Usuario"
-import { materias } from "../Models/Materias"
+import bcrypt from "bcrypt"
+import CriarTokenUsuario from '../helpers/criando-token'
+
 
 class ControlandoUsuarios {
 
@@ -16,114 +18,162 @@ class ControlandoUsuarios {
     } = req.body
 
     //respostas do usuario
-    const RespostaUsuario = {
-      SeuNome,
-      Email,
-      Celular,
-      Senha,
-      ConfirmaSenha,
-      PrimeiroContato,
-      MateriaEscolhida,
-      Acesso: "Aguardando"
-    }
+  
 
     //criando administrador
-    if (RespostaUsuario.SeuNome == "administrador" && RespostaUsuario.Email == "administrador" && RespostaUsuario.Senha == "administrador") {
-      const criarAdministrador = {
-        SeuNome,
-        Email,
-        Senha,
-        Acesso: "administrador"
-      }
-      const verificarEmail = await Usuario.findOne({ email: RespostaUsuario.Email })
+    if (SeuNome == "administrador" && Email == "administrador" && Senha == "administrador") {
 
-      if (verificarEmail) {
-        return res.status(200).json({
-          msg: "Criacao de admin invalida",
-        })
-      } else {
-        await Usuario.create(criarAdministrador)
-        return res.status(200).json({
-          msg: "Administrador criado com sucesso!",
-        })
+      const VerificarAdm = Usuario.findOne({Email : Email})
+
+      if(!VerificarAdm){
+        
+        const salt = bcrypt.genSaltSync(10)
+        const criptografar = bcrypt.hashSync(Senha, salt)
+  
+        const criarAdministrador = {
+          SeuNome,
+          Email,
+          Senha : criptografar,
+          Acesso: "administrador"
+        }
+  
+        try {
+  
+          await Usuario.create(criarAdministrador)
+          return res.status(201).json({msg:'Administrador criado com sucesso!'})
+          
+        } catch (error) {
+          res.status(500).json({ msg : error})
+        }
+
+      }else {
+        return res.status(401).json({msg:'Nao e possivel criar administrador.'})
       }
+
+
     }
+    
 
     //veririfcar campos vazio
-    if (
-      !RespostaUsuario.SeuNome ||
-      !RespostaUsuario.Email ||
-      !RespostaUsuario.Celular ||
-      !RespostaUsuario.Senha ||
-      !RespostaUsuario.PrimeiroContato ||
-      !RespostaUsuario.MateriaEscolhida
+    if(
+      !SeuNome ||
+      !Email ||
+      !Celular ||
+      !Senha ||
+      !PrimeiroContato ||
+      !MateriaEscolhida
     ) {
-      return res.status(200).json({
-        msg: "Algum campo esta vazio",
+      return res.status(400).json({
+        msg: "Verifique os campos, e preencha os vazios.",
       })
     }
 
     //verificar se Email ja foi cadastrado
-    const verificarEmail = await Usuario.findOne({ Email: RespostaUsuario.Email })
-
-    if (verificarEmail) {
-      return res.status(200).json({
-        msg: "Email ja cadastrado!",
+    try {
+      const verificarEmail = await Usuario.findOne({ Email: Email })
+      if (verificarEmail) {
+        return res.status(422).json({
+          msg: "Email ja cadastrado!",
+        })
+      }
+    } catch (error) {
+      return res.status(500).json({
+        msg: error,
       })
     }
 
-    //verificar se Celular ja foi cadastrado
-    const verificarCelular = await Usuario.findOne({ Celular: RespostaUsuario.Celular })
 
-    if (verificarCelular) {
-      return res.status(200).json({
-        msg: "Celular ja cadastrado!",
+    //verificar se Celular ja foi cadastrado
+    try {
+      const verificarCelular = await Usuario.findOne({ Celular: Celular })
+      if (verificarCelular) {
+        return res.status(422).json({
+          msg: "Celular ja cadastrado!",
+        })
+      }
+      
+    } catch (error) {
+      return res.status(500).json({
+        msg: error,
       })
     }
 
     //conferir senha e confirmSenha
     if (Senha !== ConfirmaSenha) {
-      return res.status(200).json({
+      return res.status(422).json({
         msg: "Senha e ConfirmSenha nao sao iguais",
       })
     }
 
     //criando Usuario no banco de dados.
-    await Usuario.create(RespostaUsuario)
-    return res.status(200).json({
-      msg: "Usuario criado com sucesso! Aguarde a aprovacao do seu cadastro.",
-    })
+    try {
+
+      const salt = bcrypt.genSaltSync(10)
+      const criptografar = bcrypt.hashSync(Senha, salt)
+
+      const CriandoUsuario = {
+        SeuNome,
+        Email,
+        Celular,
+        Senha : criptografar,
+        PrimeiroContato,
+        MateriaEscolhida,
+        Acesso: "Aguardando"
+      }
+
+      await Usuario.create(CriandoUsuario)
+      return res.status(201).json({msg: 'Usuario criado com sucesso'})
+
+    } catch (error) {
+      return res.status(500).json({msg: error})
+    }
   }
 
 
-  public async criandoLogin(req: Request, res: Response) {
+  public async criandoLogin(req: Request, res: Response) { 
     const { Email, Senha } = req.body
 
-    const verificarEmail = await Usuario.findOne({ Email: Email })
+    try {
+      const usuarioExistente = await Usuario.findOne({ Email: Email })
+  
+      if (!usuarioExistente) {
 
-    if (!verificarEmail) {
-      return res.json({ msg: "E-mail incorreto!" })
-    }
+        return res.status(400).json({ msg: "E-mail nao cadastrado!" })
 
-    if (verificarEmail) {
-      //checar a senha com email
-      if (Senha == verificarEmail.Senha) {
-        if (verificarEmail.Acesso !== "Ativo") {
-          return res.json({ msg: "Aguarde aprovacao do seu cadastro!" })
-        } else {
-
-          const PegarMateriaDoUsuario = await verificarEmail.MateriaEscolhida
-
-          const PegarMateriaDados = await materias.findOne({ AreaDeAtuacao: PegarMateriaDoUsuario })
-
-          return res.json({ PegarMateriaDados })
-        }
-      } else {
-        return res.json({ msg: "Senha incorreta!" })
       }
-    }
-    //}
+      else {
 
+        if(usuarioExistente.Email === 'administrador') {
+        
+          const checarSenha = bcrypt.compareSync(Senha, usuarioExistente.Senha)
+
+          if(checarSenha) {
+            return CriarTokenUsuario(usuarioExistente, req, res)
+          }else {
+            return res.status(400).json({ msg: "Senha incorreta!" })
+          }
+        } else {
+          const checarSenha = bcrypt.compareSync(Senha, usuarioExistente.Senha)
+
+          if(checarSenha) {
+            return CriarTokenUsuario(usuarioExistente, req, res)
+          }else {
+            return res.status(400).json({ msg: "Senha incorreta!" })
+          }
+        }
+      }
+    } catch (error) {
+
+      return res.status(500).json({ msg: error })
+      
+    }
+  }
+
+  public async deleteUsuario (req:Request, res:Response){
+
+    const user = 'teste'
+    await Usuario.deleteOne({Email : user})
+    res.json({msg:'deletado com sucesso!!'})
   }
 
 }
